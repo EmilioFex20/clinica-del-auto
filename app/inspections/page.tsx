@@ -104,7 +104,75 @@ export default async function InspectionsPage() {
       </header>
 
       <section className="mx-auto max-w-6xl px-4 py-6">
-        <div className="overflow-hidden rounded-2xl bg-white shadow">
+        {/* Vista móvil: cards */}
+        <div className="grid gap-3 md:hidden">
+          {inspections?.map((inspection: any) => {
+            const customer = Array.isArray(inspection.customers)
+              ? inspection.customers[0]
+              : inspection.customers;
+
+            const vehicle = Array.isArray(inspection.vehicles)
+              ? inspection.vehicles[0]
+              : inspection.vehicles;
+
+            return (
+              <div
+                key={inspection.id}
+                className="rounded-2xl bg-white p-4 shadow"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-bold">
+                      {inspection.order_number ?? "Sin orden"}
+                    </p>
+
+                    <p className="text-sm text-zinc-500">
+                      {customer?.full_name ?? "Sin cliente"}
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs">
+                    {STATUS_LABELS[inspection.status] ?? inspection.status}
+                  </span>
+                </div>
+
+                <p className="mt-3 text-sm">
+                  {vehicle
+                    ? `${vehicle.brand} ${vehicle.model} - ${
+                        vehicle.plates ?? "Sin placas"
+                      }`
+                    : "Sin vehículo"}
+                </p>
+
+                <p className="mt-1 text-sm text-zinc-500">
+                  Técnico: {inspection.technician_name ?? "Sin técnico"}
+                </p>
+
+                <p className="mt-1 text-xs text-zinc-400">
+                  {new Date(inspection.created_at).toLocaleDateString("es-MX")}
+                </p>
+
+                <div className="mt-4 flex gap-2">
+                  <Link
+                    href={`/inspections/${inspection.id}/edit`}
+                    className="flex-1 rounded-xl border px-3 py-2 text-center text-sm font-medium"
+                  >
+                    Editar
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+
+          {!inspections?.length && (
+            <div className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 shadow">
+              Todavía no hay registros.
+            </div>
+          )}
+        </div>
+
+        {/* Vista desktop: tabla */}
+        <div className="hidden overflow-hidden rounded-2xl bg-white shadow md:block">
           <table className="w-full text-sm">
             <thead className="bg-zinc-50 text-left">
               <tr>
@@ -117,37 +185,60 @@ export default async function InspectionsPage() {
                 <th className="p-3">Acciones</th>
               </tr>
             </thead>
+
             <tbody>
-              {inspections?.map((inspection: any) => (
-                <tr key={inspection.id} className="border-t">
-                  <td className="p-3 font-medium">
-                    {inspection.order_number ?? "Sin orden"}
-                  </td>
-                  <td className="p-3">
-                    {inspection.customers?.full_name ?? "Sin cliente"}
-                  </td>
-                  <td className="p-3">
-                    {inspection.vehicles
-                      ? `${inspection.vehicles.brand} ${inspection.vehicles.model} - ${inspection.vehicles.plates ?? "Sin placas"}`
-                      : "Sin vehículo"}
-                  </td>
-                  <td className="p-3">{inspection.technician_name}</td>
-                  <td className="p-3">
-                    {STATUS_LABELS[inspection.status] ?? inspection.status}
-                  </td>
-                  <td className="p-3">
-                    {new Date(inspection.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="p-3">
-                    <Link
-                      href={`/inspections/${inspection.id}/edit`}
-                      className="rounded-lg border px-3 py-1 text-sm"
-                    >
-                      Editar
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {inspections?.map((inspection: any) => {
+                const customer = Array.isArray(inspection.customers)
+                  ? inspection.customers[0]
+                  : inspection.customers;
+
+                const vehicle = Array.isArray(inspection.vehicles)
+                  ? inspection.vehicles[0]
+                  : inspection.vehicles;
+
+                return (
+                  <tr key={inspection.id} className="border-t">
+                    <td className="p-3 font-medium">
+                      {inspection.order_number ?? "Sin orden"}
+                    </td>
+
+                    <td className="p-3">
+                      {customer?.full_name ?? "Sin cliente"}
+                    </td>
+
+                    <td className="p-3">
+                      {vehicle
+                        ? `${vehicle.brand} ${vehicle.model} - ${
+                            vehicle.plates ?? "Sin placas"
+                          }`
+                        : "Sin vehículo"}
+                    </td>
+
+                    <td className="p-3">
+                      {inspection.technician_name ?? "Sin técnico"}
+                    </td>
+
+                    <td className="p-3">
+                      {STATUS_LABELS[inspection.status] ?? inspection.status}
+                    </td>
+
+                    <td className="p-3">
+                      {new Date(inspection.created_at).toLocaleDateString(
+                        "es-MX",
+                      )}
+                    </td>
+
+                    <td className="p-3">
+                      <Link
+                        href={`/inspections/${inspection.id}/edit`}
+                        className="rounded-lg border px-3 py-1 text-sm"
+                      >
+                        Editar
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
 
               {!inspections?.length && (
                 <tr>
