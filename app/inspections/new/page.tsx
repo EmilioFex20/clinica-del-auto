@@ -59,7 +59,6 @@ export default async function NewInspectionPage() {
           <h2 className="text-lg font-semibold">Datos generales</h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <Field name="order_number" label="Orden No." />
             <Field
               name="technician_name"
               label="Técnico"
@@ -193,8 +192,20 @@ export default async function NewInspectionPage() {
             Cancelar
           </a>
 
-          <button className="rounded-lg bg-black px-5 py-2 font-medium text-white">
-            Guardar registro
+          <button
+            name="intent"
+            value="draft"
+            className="rounded-lg border bg-white px-5 py-2 font-medium"
+          >
+            Guardar como inspección faltante
+          </button>
+
+          <button
+            name="intent"
+            value="completed"
+            className="rounded-lg bg-black px-5 py-2 font-medium text-white"
+          >
+            Marcar inspección terminada
           </button>
         </div>
       </form>

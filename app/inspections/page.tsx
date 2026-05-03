@@ -4,6 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { logoutAction } from "@/app/login/actions";
 
 export default async function InspectionsPage() {
+  const STATUS_LABELS: Record<string, string> = {
+    draft: "Inspección faltante",
+    completed: "Inspección terminada",
+    delivered: "Vehículo entregado",
+    cancelled: "Cancelada",
+  };
+
   const supabase = await createClient();
 
   const {
@@ -78,6 +85,14 @@ export default async function InspectionsPage() {
                 Nuevo registro
               </Link>
             )}
+            {profile.role === "admin" && (
+              <Link
+                href="/admin/inspections"
+                className="rounded-lg border px-4 py-2 text-sm"
+              >
+                Admin
+              </Link>
+            )}
 
             <form action={logoutAction}>
               <button className="rounded-lg border px-4 py-2 text-sm">
@@ -99,6 +114,7 @@ export default async function InspectionsPage() {
                 <th className="p-3">Técnico</th>
                 <th className="p-3">Estatus</th>
                 <th className="p-3">Fecha</th>
+                <th className="p-3">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -116,16 +132,26 @@ export default async function InspectionsPage() {
                       : "Sin vehículo"}
                   </td>
                   <td className="p-3">{inspection.technician_name}</td>
-                  <td className="p-3">{inspection.status}</td>
+                  <td className="p-3">
+                    {STATUS_LABELS[inspection.status] ?? inspection.status}
+                  </td>
                   <td className="p-3">
                     {new Date(inspection.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="p-3">
+                    <Link
+                      href={`/inspections/${inspection.id}/edit`}
+                      className="rounded-lg border px-3 py-1 text-sm"
+                    >
+                      Editar
+                    </Link>
                   </td>
                 </tr>
               ))}
 
               {!inspections?.length && (
                 <tr>
-                  <td className="p-6 text-center text-zinc-500" colSpan={6}>
+                  <td className="p-6 text-center text-zinc-500" colSpan={7}>
                     Todavía no hay registros.
                   </td>
                 </tr>
