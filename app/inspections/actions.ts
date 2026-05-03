@@ -112,7 +112,10 @@ export async function createInspectionAction(formData: FormData) {
       km_exit: getNumber(formData, "km_exit"),
       observations: getString(formData, "observations"),
       status: getInspectionStatus(formData),
-      completed_at: status === "completed" ? new Date().toISOString() : null,
+      completed_at:
+        getInspectionStatus(formData) === "completed"
+          ? new Date().toISOString()
+          : null,
     })
     .select("id")
     .single();
