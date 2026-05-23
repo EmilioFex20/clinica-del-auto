@@ -3,6 +3,27 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteInspectionButton } from "./DeleteInspectionButton";
 
+type RelatedCustomer = {
+  full_name: string | null;
+  phone: string | null;
+};
+
+type RelatedVehicle = {
+  brand: string | null;
+  model: string | null;
+  plates: string | null;
+};
+
+type InspectionRow = {
+  id: string;
+  order_number: string | null;
+  technician_name: string | null;
+  status: string;
+  created_at: string;
+  customers: RelatedCustomer | RelatedCustomer[] | null;
+  vehicles: RelatedVehicle | RelatedVehicle[] | null;
+};
+
 const STATUS_LABELS: Record<string, string> = {
   draft: "Inspección faltante",
   completed: "Inspección terminada",
@@ -56,6 +77,8 @@ export default async function AdminInspectionsPage() {
     throw new Error("No se pudieron cargar las inspecciones");
   }
 
+  const inspectionRows = (inspections ?? []) as InspectionRow[];
+
   return (
     <main className="min-h-screen bg-zinc-100 text-black">
       <header className="border-b bg-white">
@@ -107,7 +130,7 @@ export default async function AdminInspectionsPage() {
             </thead>
 
             <tbody>
-              {inspections?.map((inspection: any) => {
+              {inspectionRows.map((inspection) => {
                 const customer = Array.isArray(inspection.customers)
                   ? inspection.customers[0]
                   : inspection.customers;
@@ -172,7 +195,7 @@ export default async function AdminInspectionsPage() {
                 );
               })}
 
-              {!inspections?.length && (
+              {!inspectionRows.length && (
                 <tr>
                   <td className="p-6 text-center text-zinc-500" colSpan={7}>
                     Todavía no hay inspecciones registradas.

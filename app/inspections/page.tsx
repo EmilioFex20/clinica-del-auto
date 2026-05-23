@@ -3,6 +3,27 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logoutAction } from "@/app/login/actions";
 
+type RelatedCustomer = {
+  full_name: string | null;
+  phone: string | null;
+};
+
+type RelatedVehicle = {
+  brand: string | null;
+  model: string | null;
+  plates: string | null;
+};
+
+type InspectionRow = {
+  id: string;
+  order_number: string | null;
+  technician_name: string | null;
+  status: string;
+  created_at: string;
+  customers: RelatedCustomer | RelatedCustomer[] | null;
+  vehicles: RelatedVehicle | RelatedVehicle[] | null;
+};
+
 export default async function InspectionsPage() {
   const STATUS_LABELS: Record<string, string> = {
     draft: "Inspección faltante",
@@ -67,6 +88,8 @@ export default async function InspectionsPage() {
     console.error(error);
   }
 
+  const inspectionRows = (inspections ?? []) as InspectionRow[];
+
   return (
     <main className="min-h-screen bg-zinc-100 text-black">
       <header className="border-b bg-white">
@@ -106,7 +129,7 @@ export default async function InspectionsPage() {
       <section className="mx-auto max-w-6xl px-4 py-6">
         {/* Vista móvil: cards */}
         <div className="grid gap-3 md:hidden">
-          {inspections?.map((inspection: any) => {
+          {inspectionRows.map((inspection) => {
             const customer = Array.isArray(inspection.customers)
               ? inspection.customers[0]
               : inspection.customers;
@@ -164,7 +187,7 @@ export default async function InspectionsPage() {
             );
           })}
 
-          {!inspections?.length && (
+          {!inspectionRows.length && (
             <div className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 shadow">
               Todavía no hay registros.
             </div>
@@ -187,7 +210,7 @@ export default async function InspectionsPage() {
             </thead>
 
             <tbody>
-              {inspections?.map((inspection: any) => {
+              {inspectionRows.map((inspection) => {
                 const customer = Array.isArray(inspection.customers)
                   ? inspection.customers[0]
                   : inspection.customers;
@@ -240,7 +263,7 @@ export default async function InspectionsPage() {
                 );
               })}
 
-              {!inspections?.length && (
+              {!inspectionRows.length && (
                 <tr>
                   <td className="p-6 text-center text-zinc-500" colSpan={7}>
                     Todavía no hay registros.
