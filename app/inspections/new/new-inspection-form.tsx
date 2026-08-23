@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import imageCompression from "browser-image-compression";
 
 type Section = {
   id: string;
@@ -102,14 +103,20 @@ export function NewInspectionForm({
           throw new Error(`${photoField.label} no puede pesar más de 5 MB.`);
         }
 
-        const extension = getExtensionFromFile(file);
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1600,
+          useWebWorker: true,
+          fileType: "image/webp",
+          initialQuality: 0.75,
+        });
 
-        const filePath = `${user.id}/${temporaryInspectionKey}/${photoField.name}.${extension}`;
+        const filePath = `${user.id}/${temporaryInspectionKey}/${photoField.name}.webp`;
 
         const { error: uploadError } = await supabase.storage
           .from("inspection-photos")
-          .upload(filePath, file, {
-            contentType: file.type,
+          .upload(filePath, compressedFile, {
+            contentType: compressedFile.type,
             upsert: false,
           });
 
@@ -122,7 +129,7 @@ export function NewInspectionForm({
         uploadedPhotoPaths.push(filePath);
 
         formData.delete(photoField.name);
-        formData.append("photo_paths", filePath);
+        formData.append(`${photoField.name}_path`, filePath);
       }
 
       await createInspectionAction(formData);

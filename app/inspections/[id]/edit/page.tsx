@@ -81,6 +81,10 @@ export default async function EditInspectionPage({ params }: PageProps) {
       customer_id,
       vehicle_id,
       created_by,
+      photo_front_path,
+      photo_rear_path,
+      photo_left_path,
+      photo_right_path,
       customers (
         id,
         full_name,

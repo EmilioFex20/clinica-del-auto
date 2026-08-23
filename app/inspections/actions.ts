@@ -131,6 +131,11 @@ export async function createInspectionAction(formData: FormData) {
     throw new Error(`No se pudo crear el vehículo: ${vehicleError.message}`);
   }
 
+  const photoFrontPath = formData.get("photo_front_path")?.toString() || null;
+  const photoRearPath = formData.get("photo_rear_path")?.toString() || null;
+  const photoLeftPath = formData.get("photo_left_path")?.toString() || null;
+  const photoRightPath = formData.get("photo_right_path")?.toString() || null;
+
   const status = getInspectionStatus(formData);
 
   const { data: inspection, error: inspectionError } = await supabase
@@ -148,6 +153,10 @@ export async function createInspectionAction(formData: FormData) {
       km_entry: getNumber(formData, "km_entry"),
       km_exit: getNumber(formData, "km_exit"),
       observations: getString(formData, "observations"),
+      photo_front_path: photoFrontPath,
+      photo_rear_path: photoRearPath,
+      photo_left_path: photoLeftPath,
+      photo_right_path: photoRightPath,
       status,
       completed_at: status === "completed" ? new Date().toISOString() : null,
     })
@@ -157,32 +166,6 @@ export async function createInspectionAction(formData: FormData) {
   if (inspectionError) {
     console.error("INSPECTION CREATE ERROR:", inspectionError);
     throw new Error("No se pudo crear la inspección");
-  }
-
-  const uploadedPhotoPaths = formData
-    .getAll("photo_paths")
-    .map((value) => String(value).trim())
-    .filter(Boolean);
-
-  if (uploadedPhotoPaths.length > 0) {
-    const { error: attachmentsError } = await supabase
-      .from("inspection_attachments")
-      .insert(
-        uploadedPhotoPaths.map((filePath) => ({
-          inspection_id: inspection.id,
-          file_path: filePath,
-        })),
-      );
-
-    if (attachmentsError) {
-      console.error("ATTACHMENTS CREATE ERROR:", attachmentsError);
-
-      await supabase.storage
-        .from("inspection-photos")
-        .remove(uploadedPhotoPaths);
-
-      throw new Error("No se pudieron guardar las fotos de la inspección");
-    }
   }
 
   const { data: items, error: itemsError } = await supabase
